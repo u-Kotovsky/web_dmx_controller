@@ -15,11 +15,14 @@ if (isGridPreview) {
 let nodes = []
 
 let node1 = new Gridnode()
-let node2 = new Gridnode()
+let depthNode = new Gridnode()
 
-let uni0 = createVRSLGridnode(0)
-let uni1 = createVRSLGridnode(1)
-let uni2 = createVRSLGridnode(2)
+let colorNode = new Gridnode()
+
+//let uni0 = createVRSLGridnode(0)
+//let uni1 = createVRSLGridnode(1)
+//let uni2 = createVRSLGridnode(2)
+//nodes.push(uni0, uni1, uni2)
 
 function createVRSLGridnode(universe) {
     let node = new Gridnode()
@@ -33,20 +36,47 @@ function createVRSLGridnode(universe) {
 }
 
 node1.workers.push(new AllColorWorker())
-node2.workers.push(new TestWorker())
-node2.offset = new Vector2(0,canvas.height - node2.pixelSettings.gridSize.y)
 node1.apply_settings()
-node2.apply_settings()
-//node2.workers.push(new AllColorWorker())
 
-nodes.push(node1, node2, uni0, uni1, uni2)
-/*node2.pixelSettings.realSize.set(8, 8)
-node2.pixelSettings.count.set(32, 32)
-node2.scrollReverse = true;
-node2.pixelSettings.apply_settings()
-node2.offset = new Vector2(0, canvas.height - node2.pixelSettings.gridSize.y)
-node2.apply_settings()
-console.log(node2.pixelSettings.gridSize.x)*/
+// 1st texture = color
+// 2nd texture = depth
+
+// 568 x 568
+//
+
+const get_count = (pixelSizeX) => 568 / pixelSizeX;
+const get_pixel_size = (countX) => 568 / countX
+
+let count = 17
+let pixel = get_pixel_size(count)
+
+colorNode.workers.push(new AllColorWorker(new Vector3(255, 125, 0)))
+colorNode.offset = new Vector2(0,canvas.height - colorNode.pixelSettings.gridSize.y)
+colorNode.apply_settings()
+
+colorNode.pixelSettings.realSize.set(pixel, pixel)
+colorNode.pixelSettings.count.set(count, count)
+colorNode.scrollReverse = true;
+colorNode.pixelSettings.apply_settings()
+colorNode.offset = new Vector2(0, canvas.height - colorNode.pixelSettings.gridSize.y)
+colorNode.apply_settings()
+
+console.log(colorNode.pixelSettings.count.x * colorNode.pixelSettings.realSize.x)
+
+//console.log(colorNode.pixelSettings.gridSize.x*colorNode.pixelSettings.realSize.x)
+
+depthNode.workers.push(new ParWorker(new Vector3(255, 0, 0)))
+depthNode.pixelSettings.realSize.set(pixel, pixel)
+depthNode.pixelSettings.count.set(count, count)
+depthNode.scrollReverse = true;
+depthNode.offset = new Vector2(colorNode.pixelSettings.count.x*colorNode.pixelSettings.realSize.x, 
+    canvas.height - colorNode.pixelSettings.gridSize.y)
+depthNode.pixelSettings.apply_settings()
+depthNode.apply_settings()
+console.log(depthNode.offset)
+
+nodes.push(node1, colorNode, depthNode)
+console.log(colorNode.pixelSettings.gridSize.x)
 
 console.log(`canvas scale ${canvas.width} ${canvas.height}` /*+ 
     `\nreal pixel size ${node1.pixelSettings.realSize.x} ${node1.pixelSettings.realSize.y}` + 

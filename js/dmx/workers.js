@@ -4,7 +4,6 @@ class BaseWorker {
     }
 }
 
-
 class AllColorWorker extends BaseWorker {
     color = new Vector3(255, 0, 255)
 
@@ -25,6 +24,69 @@ class AllColorWorker extends BaseWorker {
                 node.data[i] = this.color.x
             }
         }
+    }
+}
+
+class ParWorker extends BaseWorker {
+    color = new Vector3(255, 0, 255)
+
+    subtractFactor = .25;
+
+    first_time_setup = true;
+
+    constructor(color = new Vector3(255, 255, 255)) {
+        super()
+        this.color.set(color.x, color.y, color.z)
+    }
+
+    write(node) {
+        for (let i = 0; i < node.data.length; i++) {
+            if (isVector3(node.data[i])) {
+                if (isVector3NaN(node.data[i])) throw `Vector3 found to have NaN.`, node.data[i];
+
+                if (node.data[i].flip == null) {
+                    node.data[i].flip = i % 2 == 0
+                }
+
+                //node.data[i].set(this.color.x, this.color.y, this.color.z)
+                // Fade values
+                if (i % 2 == 1) {
+                        
+                    if (node.data[i].flip) {
+                        node.data[i].x += this.subtractFactor;
+                        //node.data[i].add(this.subtractFactor, this.subtractFactor, this.subtractFactor);
+                        if (node.data[i].x >= 255) {
+                            node.data[i].flip = !node.data[i].flip;
+                            //node.data[i].x = 255;
+                            //node.data[i].y = 255;
+                            //node.data[i].z = 255;
+                        }
+                    } else {
+                        node.data[i].x -= this.subtractFactor;
+                        //node.data[i].subtract(this.subtractFactor, this.subtractFactor, this.subtractFactor);
+                        if (node.data[i].x <= 0) {
+                            node.data[i].flip = !node.data[i].flip;
+                            //node.data[i].x = 0;
+                            //node.data[i].y = 0;
+                            //node.data[i].z = 0;
+                        }
+                    }
+                }
+
+                //if (node.data[i].x < 0) node.data[i].x = 0; // Maybe put in vector3 method.
+                //if (node.data[i].y < 0) node.data[i].y = 0;
+                //if (node.data[i].z < 0) node.data[i].z = 0;
+            } else {
+                if (isNaN(node.data[i])) throw `Number found to be NaN at ${i} in data array.`, node.data[i];
+                
+                //node.data[i] = this.color.x
+                // Fade value
+                node.data[i] -= this.subtractFactor;
+                if (node.data[i] < 0) node.data[i] = 0;
+            }
+        }
+
+        this.first_time_setup = false;
     }
 }
 

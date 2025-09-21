@@ -100,6 +100,12 @@ class Vector3 extends Vector {
         this.z -= z;
     }
 
+    add(x = 0, y = 0, z = 0) {
+        this.x += x;
+        this.y += y;
+        this.z += z;
+    }
+
     getColor() {
         return `rgb(${this.x}, ${this.y}, ${this.z})`
     }
