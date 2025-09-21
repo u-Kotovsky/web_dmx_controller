@@ -31,9 +31,7 @@ function apply_data_to_block(block, data) {
         if (isVector3(data)) {
             block.set(data.x, data.y, data.z)
         } else {
-            block.x = data
-            block.y = data
-            block.z = data
+            block.set(data, data, data)
         }
     } else {
         if (isVector3(data)) {

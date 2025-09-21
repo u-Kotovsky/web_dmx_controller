@@ -21,8 +21,6 @@ let uni0 = createVRSLGridnode(0)
 let uni1 = createVRSLGridnode(1)
 let uni2 = createVRSLGridnode(2)
 
-nodes.push(node1, node2, uni0, uni1, uni2)
-
 function createVRSLGridnode(universe) {
     let node = new Gridnode()
     node.maxChannels = 512;
@@ -30,28 +28,25 @@ function createVRSLGridnode(universe) {
     node.pixelSettings.count.set(40, 13)
     node.offset = new Vector2(node.pixelSettings.realSize.x * node.pixelSettings.count.x * universe, 0)
     node.apply_settings()
-    node.workers.push(new AllColorWorker())
+    node.workers.push(new AllColorWorker(new Vector3(255, 255, 255)))
     return node;
 }
 
-node1.workers.push(new TestWorker())
-node2.workers.push(new FrameTestWorker())
+node1.workers.push(new AllColorWorker())
+node2.workers.push(new TestWorker())
 node2.offset = new Vector2(0,canvas.height - node2.pixelSettings.gridSize.y)
+node1.apply_settings()
 node2.apply_settings()
-node2.workers.push(new AllColorWorker())
-/*
-node2.pixelSettings.realSize.set(8, 8)
+//node2.workers.push(new AllColorWorker())
+
+nodes.push(node1, node2, uni0, uni1, uni2)
+/*node2.pixelSettings.realSize.set(8, 8)
 node2.pixelSettings.count.set(32, 32)
 node2.scrollReverse = true;
 node2.pixelSettings.apply_settings()
-node2.offset = 
- new Vector2(
-    0,
-    canvas.height - node2.pixelSettings.gridSize.y
-)
+node2.offset = new Vector2(0, canvas.height - node2.pixelSettings.gridSize.y)
 node2.apply_settings()
 console.log(node2.pixelSettings.gridSize.x)*/
-
 
 console.log(`canvas scale ${canvas.width} ${canvas.height}` /*+ 
     `\nreal pixel size ${node1.pixelSettings.realSize.x} ${node1.pixelSettings.realSize.y}` + 
@@ -65,7 +60,6 @@ for (let i = 0; i < 3; i++) {
 }*/
 
 // Main render
-
 class Renderer {
     debug_patch = false;
     counter = 0;
@@ -102,9 +96,7 @@ let renderer = new Renderer(nodes, ctx)
 let pause = false;
 
 function request_render() {
-    if (!pause) {
-        renderer.render();
-    }
+    if (!pause) renderer.render();
 
     //setTimeout(() => {
         requestAnimationFrame( request_render )

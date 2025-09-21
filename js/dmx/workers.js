@@ -1,6 +1,30 @@
 class BaseWorker {
-    write(node1) {
+    write(node) {
 
+    }
+}
+
+
+class AllColorWorker extends BaseWorker {
+    color = new Vector3(255, 0, 255)
+
+    constructor(color = new Vector3(255, 255, 255)) {
+        super()
+        this.color.set(color.x, color.y, color.z)
+    }
+
+    write(node) {
+        for (let i = 0; i < node.data.length; i++) {
+            if (isVector3(node.data[i])) {
+                if (isVector3NaN(node.data[i])) throw `Vector3 found to have NaN.`, node.data[i];
+
+                node.data[i].set(this.color.x, this.color.y, this.color.z)
+            } else {
+                if (isNaN(node.data[i])) throw `Number found to be NaN at ${i} in data array.`, node.data[i];
+                
+                node.data[i] = this.color.x
+            }
+        }
     }
 }
 
@@ -24,7 +48,7 @@ class TestWorker extends BaseWorker {
     scrollMax = 5;
     mirror = false;
 
-    write(node1) {
+    write(node) {
         this.timerToFlash += 1
         if (this.scrollReverse) {
             if (this.mi < 0) {
@@ -45,11 +69,13 @@ class TestWorker extends BaseWorker {
                 }
             }
         }
+
         if (this.timerToFlash >= this.timeToFlash) {
             this.timerToFlash = 0;
 
-            for (let i = 0; i < node1.pixelSettings.count.x * node1.pixelSettings.count.y; i++) {
-                let value = node1.data[i];
+            // node.pixelSettings.count.x * node.pixelSettings.count.y
+            for (let i = 0; i < (node.data.length); i++) {
+                let value = node.data[i];
                 //if (index == i) {
                 //    value = RandomString.randomNumberInRange(55, 125) 
                 //}
@@ -68,35 +94,39 @@ class TestWorker extends BaseWorker {
                     }
                 }
 
-                apply_data_to_block(node1.data[i], value);
+                if (node.data[i] == null) {
+                    console.error(i, node.data.length)
+                }
+
+                apply_data_to_block(node.data[i], value); // node.data[i] is null for some reason
                 //data[i] = RandomString.randomNumberInRange(0, 255);// i % 2 == 0 ? 255 : 125
             }
 
             this.mi += this.scrollReverse ? -1 : 1;
             
-            if (this.mirror) apply_mirror(node1.data)
+            if (this.mirror) apply_mirror(node.data)
         } else {
-            for (let i = 0; i < node1.data.length; i++) {
+            for (let i = 0; i < node.data.length; i++) {
                 /*if (isVector3(data[i])) {
                     value = data[i]
                     if (value.x > 0) value.x -= 8;
                     if (value.y > 0) value.y -= 8;
                     if (value.z > 0) value.z -= 8;
                 }*/
-                if (isVector3(node1.data[i])) {
-                    if (isVector3NaN(node1.data[i])) throw `Vector3 found to have NaN.`, node1.data[i];
+                if (isVector3(node.data[i])) {
+                    if (isVector3NaN(node.data[i])) throw `Vector3 found to have NaN.`, node.data[i];
 
                     // Fade values
-                    node1.data[i].subtract(this.subtractFactor, this.subtractFactor, this.subtractFactor);
-                    if (node1.data[i].x < 0) node1.data[i].x = 0; // Maybe put in vector3 method.
-                    if (node1.data[i].y < 0) node1.data[i].y = 0;
-                    if (node1.data[i].z < 0) node1.data[i].z = 0;
+                    node.data[i].subtract(this.subtractFactor, this.subtractFactor, this.subtractFactor);
+                    if (node.data[i].x < 0) node.data[i].x = 0; // Maybe put in vector3 method.
+                    if (node.data[i].y < 0) node.data[i].y = 0;
+                    if (node.data[i].z < 0) node.data[i].z = 0;
                 } else {
-                    if (isNaN(node1.data[i])) throw `Number found to be NaN at ${i} in data array.`, node1.data[i];
+                    if (isNaN(node.data[i])) throw `Number found to be NaN at ${i} in data array.`, node.data[i];
                     
                     // Fade value
-                    node1.data[i] -= this.subtractFactor;
-                    if (node1.data[i] < 0) node1.data[i] = 0;
+                    node.data[i] -= this.subtractFactor;
+                    if (node.data[i] < 0) node.data[i] = 0;
                 }
             }
         }
@@ -303,15 +333,16 @@ class FrameTestWorker extends BaseWorker {
     subtractFactor = 2;
     mirror = true;
     
-    roll_values(node1) {
+    roll_values(node) {
         this.timerToFlash += 1
         if (this.frame >= this.frames.length) this.frame = 0;
 
         if (this.timerToFlash >= this.timeToFlash) {
             this.timerToFlash = 0;
 
-            for (let i = 0; i < node1.pixelSettings.count.x * node1.pixelSettings.count.y; i++) {
-                let value = node1.data[i];
+            // node.pixelSettings.count.x * node.pixelSettings.count.y
+            for (let i = 0; i < node.data.length; i++) {
+                let value = node.data[i];
                 //if (index == i) {
                 //    value = RandomString.randomNumberInRange(55, 125) 
                 //}
@@ -334,54 +365,35 @@ class FrameTestWorker extends BaseWorker {
                 }
                 value = _frame[i];
 
-                apply_data_to_block(node1.data[i], value); // value = undefined
+                apply_data_to_block(node.data[i], value); // value = undefined
                 //data[i] = RandomString.randomNumberInRange(0, 255);// i % 2 == 0 ? 255 : 125
             }
 
             this.frame++;
             
-            if (this.mirror) apply_mirror(node1.data)
+            if (this.mirror) apply_mirror(node.data)
         } else {
-            for (let i = 0; i < node1.data.length; i++) {
-                if (isVector3(node1.data[i])) {
-                    if (isVector3NaN(node1.data[i])) throw `Vector3 found to have NaN.`, node1.data[i];
+            for (let i = 0; i < node.data.length; i++) {
+                if (isVector3(node.data[i])) {
+                    if (isVector3NaN(node.data[i])) throw `Vector3 found to have NaN.`, node.data[i];
 
                     // Fade values
-                    node1.data[i].subtract(this.subtractFactor, this.subtractFactor, this.subtractFactor);
-                    if (node1.data[i].x < 0) node1.data[i].x = 0; // Maybe put in vector3 method.
-                    if (node1.data[i].y < 0) node1.data[i].y = 0;
-                    if (node1.data[i].z < 0) node1.data[i].z = 0;
+                    node.data[i].subtract(this.subtractFactor, this.subtractFactor, this.subtractFactor);
+                    if (node.data[i].x < 0) node.data[i].x = 0; // Maybe put in vector3 method.
+                    if (node.data[i].y < 0) node.data[i].y = 0;
+                    if (node.data[i].z < 0) node.data[i].z = 0;
                 } else {
-                    if (isNaN(node1.data[i])) throw `Number found to be NaN at ${i} in data array.`, node1.data[i];
+                    if (isNaN(node.data[i])) throw `Number found to be NaN at ${i} in data array.`, node.data[i];
                     
                     // Fade value
-                    node1.data[i] -= this.subtractFactor;
-                    if (node1.data[i] < 0) node1.data[i] = 0;
+                    node.data[i] -= this.subtractFactor;
+                    if (node.data[i] < 0) node.data[i] = 0;
                 }
             }
         }
     }
 
-    write(node1) {
-        this.roll_values(node1);
-    }
-}
-
-
-class AllColorWorker extends BaseWorker {
-    color = new Vector2(255, 255, 255)
-
-    write(node1) {
-        for (let i = 0; i < node1.data.length; i++) {
-            if (isVector3(node1.data[i])) {
-                if (isVector3NaN(node1.data[i])) throw `Vector3 found to have NaN.`, node1.data[i];
-
-                node1.data[i].set(this.color.x, this.color.y, this.color.z)
-            } else {
-                if (isNaN(node1.data[i])) throw `Number found to be NaN at ${i} in data array.`, node1.data[i];
-                
-                node1.data[i] = this.color.x
-            }
-        }
+    write(node) {
+        this.roll_values(node);
     }
 }

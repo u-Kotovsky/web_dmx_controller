@@ -48,7 +48,7 @@ class Gridnode {
     }
 
     apply_settings() {
-        let count = this.pixelSettings.count.x * this.pixelSettings.count.y - 5
+        let count = this.pixelSettings.count.x * this.pixelSettings.count.y
 
         if (this.maxChannels > 0 && count > this.maxChannels) {
             count = this.maxChannels
@@ -64,30 +64,36 @@ class Gridnode {
 
     render(ctx) {
         this.lastPixelPosition.set(0, 0)
-        //this.roll_values();
         this.workers.forEach(worker => {
             worker.write(this);
         })
 
         //this.data[0] = new Vector3(50, 0, 0)
         for (let i = 0; i < (this.data.length > this.length ? this.data.length : this.length); i++) {
-            if (i > this.maxChannels) continue;
+            if (this.maxChannels > 0 && i > this.maxChannels) {
+                throw i, this.maxChannels
+            }
             let vector = new Vector3(); // out color
             this._pos.set(this.offset.x + this.lastPixelPosition.x, this.offset.y + this.lastPixelPosition.y);
 
             if (this.debug_patch) {
                 if (this.data.length > this.length) {
-                    vector.z = 255;
+                    throw `${this.data.length} ${this.length}`
+                    vector.z = 125;
                 } else {
-                    vector.y = 255;
+                    vector.y = 125;
                 }
 
-                if (this.data[i] == null) vector.x = 255;
+                if (this.data[i] == null) {
+                    throw this.data[i]
+                    vector.x = 255;
+                }
                 ctx.fillStyle = 'rgb(255, 0, 0)'
                 this._pos.add(2, 12)
                 draw_text(ctx, this._pos, `${i}`, '.9em', 'Calibri', 'start', 'alphabetic', false)
             } else {
                 if (this.data[i] == null) {
+                    throw this.data[i]
                     vector.set(125, 0, 0);
                 } else {
                     if (isVector3(this.data[i]))
@@ -104,7 +110,7 @@ class Gridnode {
             
             draw_rect(ctx, this._pos, this.pixelSettings.realSize, 
                 this.debug_patch 
-                ? this.data[i] != null ? vector.getColor() : 'rgb(255, 255, 0)'
+                ? this.data[i] != null ? vector.getColor() : 'rgb(255, 125, 0)'
                 : vector.getColor());
             if (isGridPreview) {
                 draw_rect(ctx2, this.lastPixelPosition, this.pixelSettings.realSize, this.debug_patch 
